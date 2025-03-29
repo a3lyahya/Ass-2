@@ -1,0 +1,457 @@
+class Room:
+    def __init__(self, room_number: int, room_type: str, amenities: list, price_per_night: float):
+        """
+        Create a room with its number, type, amenities list, and price.
+        Sets availability to True by default.
+        """
+        self.__room_number = room_number
+        self.__room_type = room_type
+        self.__amenities = amenities
+        self.__price_per_night = price_per_night
+        self._is_available = True
+
+
+    # Getter and Setter Methods
+
+
+    def get_room_number(self):
+        """Return the room number."""
+        return self.__room_number
+
+
+    def set_room_number(self, number):
+        """Set a new room number."""
+        self.__room_number = number
+
+
+    def get_room_type(self):
+        """Return the room type (e.g., single, double)."""
+        return self.__room_type
+
+
+    def set_room_type(self, room_type):
+        """Set a new room type."""
+        self.__room_type = room_type
+
+
+    def get_amenities(self):
+        """Return a list of amenities in the room."""
+        return self.__amenities
+
+
+    def set_amenities(self, amenities):
+        """Set a new list of amenities."""
+        self.__amenities = amenities
+
+
+    def get_price_per_night(self):
+        """Return the price per night."""
+        return self.__price_per_night
+
+
+    def set_price_per_night(self, price):
+        """Set a new price per night."""
+        self.__price_per_night = price
+
+
+    def is_available(self):
+        """Check if the room is available."""
+        return self._is_available
+
+
+    def set_availability(self, status):
+        """Set room availability to True or False."""
+        self._is_available = status
+
+
+    def get_room_info(self):
+        """Return a description of the room."""
+        return f"Room {self.__room_number} ({self.__room_type}), Price: ${self.__price_per_night}/night"
+
+
+    def __str__(self):
+        return self.get_room_info()
+
+
+class Guest:
+    def __init__(self, name: str, email: str, phone: str, loyalty_status: str = "Regular"):
+        """
+        Create a guest profile with personal details and an empty booking history.
+        """
+        self.__name = name
+        self.__email = email
+        self.__phone = phone
+        self._loyalty_status = loyalty_status
+        self.__reservation_history = []
+
+
+    # Getter and Setter Methods
+
+
+    def get_name(self):
+        """Return the guest's name."""
+        return self.__name
+
+
+    def set_name(self, name):
+        """Set a new name."""
+        self.__name = name
+
+
+    def get_email(self):
+        """Return the guest's email."""
+        return self.__email
+
+
+    def set_email(self, email):
+        """Set a new email address."""
+        self.__email = email
+
+
+    def get_phone(self):
+        """Return the guest's phone number."""
+        return self.__phone
+
+
+    def set_phone(self, phone):
+        """Set a new phone number."""
+        self.__phone = phone
+
+
+    def get_loyalty_status(self):
+        """Return the loyalty status."""
+        return self._loyalty_status
+
+
+    def set_loyalty_status(self, status):
+        """Set a new loyalty status."""
+        self._loyalty_status = status
+
+
+    def get_reservation_history(self):
+        """Return the list of past bookings."""
+        return self.__reservation_history
+
+
+    def add_to_history(self, booking):
+        """Add a booking to the guest's reservation history."""
+        self.__reservation_history.append(booking)
+
+
+    def create_account(self):
+        """Simulate account creation message."""
+        return f"Account created for {self.__name}"
+
+
+    def update_profile(self, name=None, email=None, phone=None):
+        """Update guest profile information if new values are given."""
+        if name:
+            self.set_name(name)
+        if email:
+            self.set_email(email)
+        if phone:
+            self.set_phone(phone)
+
+
+    def view_history(self):
+        """Print all past bookings."""
+        return [str(booking) for booking in self.__reservation_history]
+
+
+    def __str__(self):
+        return f"Guest: {self.__name}, Email: {self.__email}, Phone: {self.__phone}"
+
+
+class Booking:
+    def __init__(self, booking_id: str, guest, room, check_in: str, check_out: str):
+        """
+        Create a booking with a guest, room, and check-in/check-out dates.
+        Adds the booking to the guest’s history and marks the room as unavailable.
+        """
+        self.__booking_id = booking_id
+        self.__guest = guest
+        self.__room = room
+        self.__check_in = check_in
+        self.__check_out = check_out
+        self.__invoice = None
+        guest.add_to_history(self)
+        room.set_availability(False)
+
+
+    def calculate_total(self):
+        """Calculate the total price for the stay (1 night by default)."""
+        return self.__room.get_price_per_night() * 1
+
+
+    def confirm_booking(self):
+        """Return a confirmation message for the booking."""
+        return f"Booking {self.__booking_id} confirmed for {self.__guest} in {self.__room}"
+
+
+    def cancel_booking(self):
+        """Cancel the booking and set the room back to available."""
+        self.__room.set_availability(True)
+
+
+    def set_invoice(self, invoice):
+        """Link an invoice to this booking."""
+        self.__invoice = invoice
+
+
+    def __str__(self):
+        return self.confirm_booking()
+
+
+class Invoice:
+    def __init__(self, booking, extra_charges: float = 0.0, discount: float = 0.0):
+        """
+        Create an invoice based on a booking.
+        Includes room price, extra charges, discounts, and calculates the total.
+        """
+        self.__booking = booking
+        self.__room_price = booking.calculate_total()
+        self.__extra_charges = extra_charges
+        self.__discount = discount
+        self.__total_amount = self.__room_price + extra_charges - discount
+        self._payment_status = "Unpaid"
+
+
+    def generate_invoice(self):
+        """Return a summary of the invoice with the total amount."""
+        return f"Invoice for {self.__booking}: Total = ${self.__total_amount}"
+
+
+    def apply_discount(self):
+        """Apply the discount and update the total."""
+        self.__total_amount -= self.__discount
+
+
+    def process_payment(self):
+        """Mark the invoice as paid."""
+        self._payment_status = "Paid"
+
+
+    def __str__(self):
+        return self.generate_invoice()
+
+
+class LoyaltyProgram:
+    def __init__(self, guest):
+        """
+        Create a loyalty program account for a guest.
+        Keeps track of earned and redeemed points.
+        """
+        self.__guest = guest
+        self.__points = 0
+
+
+    def add_points(self, nights: int):
+        """Add 10 points per night stayed."""
+        self.__points += nights * 10
+
+
+    def redeem_points(self, amount: int):
+        """Use points if the guest has enough."""
+        if self.__points >= amount:
+            self.__points -= amount
+
+
+    def get_points(self):
+        """Return how many points the guest has."""
+        return self.__points
+
+
+    def __str__(self):
+        return f"{self.__guest} has {self.__points} loyalty points"
+
+
+class ServiceRequest:
+    def __init__(self, guest, request_type: str):
+        """
+        Create a request (like housekeeping or room service) made by a guest.
+        """
+        self.__guest = guest
+        self.__request_type = request_type
+        self.__status = "Pending"
+
+
+    def make_request(self):
+        """Describe what the guest requested."""
+        return f"{self.__guest} requested {self.__request_type}"
+
+
+    def update_status(self, new_status: str):
+        """Update the request status (e.g., Completed or In Progress)."""
+        self.__status = new_status
+
+
+    def __str__(self):
+        return f"Request: {self.__request_type}, Status: {self.__status} for {self.__guest}"
+
+
+class Feedback:
+    def __init__(self, guest, comment: str, rating: int):
+        """
+        Allow a guest to leave feedback with a comment and rating out of 5.
+        """
+        self.__guest = guest
+        self.__comment = comment
+        self.__rating = rating
+
+
+    def __str__(self):
+        return f"Feedback from {self.__guest}: '{self.__comment}' ({self.__rating}/5)"
+
+
+def create_guest_with_input():
+    try:
+        print("\n--- Create New Guest ---")
+        name = input("Enter name: ")
+        email = input("Enter email: ")
+        phone = input("Enter phone number: ")
+        loyalty = input("Enter loyalty status (e.g. Regular, Silver, Gold): ")
+
+        # Create Guest
+        guest = Guest(name, email, phone, loyalty)
+        print("\nGuest created successfully!")
+        print(guest)
+        print("Loyalty Status:", guest.get_loyalty_status())
+        return guest
+
+    except Exception as e:
+        print("Error creating guest:", e)
+
+# Run twice for two guests
+guest1 = create_guest_with_input()
+guest2 = create_guest_with_input()
+
+# Sample rooms
+room1 = Room(101, "Single", ["WiFi", "TV"], 200.0)
+room2 = Room(102, "Double", ["WiFi", "Mini-Bar"], 300.0)
+room3 = Room(103, "Suite", ["WiFi", "TV", "Balcony"], 500.0)
+room3.set_availability(False)  # Mark one as unavailable
+
+rooms = [room1, room2, room3]
+
+def search_rooms():
+    try:
+        print("\n--- Room Search ---")
+        desired_type = input("Enter room type (Single/Double/Suite): ")
+        amenities_input = input("Enter required amenities separated by commas: ")
+        required_amenities = [a.strip() for a in amenities_input.split(",")]
+
+        found = []
+        for room in rooms:
+            if room.is_available() and room.get_room_type() == desired_type:
+                if all(item in room.get_amenities() for item in required_amenities):
+                    found.append(room)
+
+        print("\n✅ Matching Available Rooms:")
+        for r in found:
+            print(r)
+
+        if not found:
+            print("No rooms found with your criteria.")
+
+    except Exception as e:
+        print("❌ Error in room search:", e)
+
+# Run twice
+search_rooms()
+
+def make_booking(guest, room):
+    try:
+        print("\n--- Make a Booking ---")
+        booking_id = input("Enter booking ID: ")
+        check_in = input("Enter check-in date (YYYY-MM-DD): ")
+        check_out = input("Enter check-out date (YYYY-MM-DD): ")
+
+        booking = Booking(booking_id, guest, room, check_in, check_out)
+        print("\n✅ Booking Confirmed!")
+        print(booking)
+        return booking
+    except Exception as e:
+        print("❌ Booking failed:", e)
+
+# Booking examples using guest1 and guest2 from earlier
+booking1 = make_booking(guest1, room1)
+booking2 = make_booking(guest2, room2)
+
+def send_notification(guest, booking):
+    try:
+        print("\n📩 Sending Notification...")
+        print(f"To: {guest.get_email()}")
+        print("Subject: Booking Confirmation")
+        print(booking.confirm_booking())
+    except Exception as e:
+        print("❌ Notification error:", e)
+
+send_notification(guest1, booking1)
+send_notification(guest2, booking2)
+
+def create_invoice(booking):
+    try:
+        print("\n--- Invoice Creation ---")
+        extra = float(input("Enter extra charges (e.g. 50): "))
+        discount = float(input("Enter discount amount (e.g. 20): "))
+
+        invoice = Invoice(booking, extra_charges=extra, discount=discount)
+        invoice.apply_discount()
+        booking.set_invoice(invoice)
+
+        print("\n✅ Invoice Generated:")
+        print(invoice)
+        return invoice
+    except Exception as e:
+        print("❌ Invoice creation failed:", e)
+
+invoice1 = create_invoice(booking1)
+invoice2 = create_invoice(booking2)
+
+def process_payment(invoice):
+    try:
+        method = input("Enter payment method (Credit Card / Mobile Wallet): ")
+        print(f"\nProcessing payment using {method}...")
+        invoice.process_payment()
+        print("✅ Payment Completed. Status:", invoice._payment_status)
+    except Exception as e:
+        print("❌ Payment failed:", e)
+
+process_payment(invoice1)
+process_payment(invoice2)
+
+ef display_history(guest):
+    print(f"\n📘 Reservation History for {guest.get_name()}:")
+    for booking in guest.get_reservation_history():
+        print("---------------")
+        print(f"Booking ID: {booking._Booking__booking_id}")
+        print(f"Name: {guest.get_name()}")
+        print(f"Email: {guest.get_email()}")
+        print(f"Phone: {guest.get_phone()}")
+        print(f"Check-In: {booking._Booking__check_in}")
+        print(f"Check-Out: {booking._Booking__check_out}")
+        print(f"Room Number: {booking._Booking__room.get_room_number()}")
+        print(f"Room Type: {booking._Booking__room.get_room_type()}")
+
+display_history(guest1)
+display_history(guest2)
+
+def cancel_booking_with_notice(booking, guest):
+    try:
+        reason = input(f"\nDo you want to cancel Booking {booking._Booking__booking_id}? (yes/no): ").lower()
+        if reason == "yes":
+            booking.cancel_booking()
+            print("✅ Booking Cancelled!")
+            refund_policy = input("Is this an early cancellation? (yes/no): ").lower()
+            if refund_policy == "yes":
+                print("💸 Full refund issued.")
+            else:
+                print("⚠️ Late cancellation – No refund.")
+            print("Room availability reset to:", booking._Booking__room.is_available())
+        else:
+            print("Booking not cancelled.")
+    except Exception as e:
+        print("❌ Cancellation error:", e)
+
+cancel_booking_with_notice(booking1, guest1)
+cancel_booking_with_notice(booking2, guest2)
